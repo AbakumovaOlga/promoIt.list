@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.function.Consumer;
 
 public class AbakumovaList<T>
         implements List<T> {
@@ -34,9 +35,8 @@ public class AbakumovaList<T>
 
     @Override
     public boolean contains(Object o) {
-        for (Object element : list
-        ) {
-            if (element.equals(o)) {
+        for (int i=0; i<size;i++) {
+            if (list[i].equals(o)) {
                 return true;
             }
         }
@@ -45,19 +45,20 @@ public class AbakumovaList<T>
 
     @Override
     public Iterator<T> iterator() {
-        //TODO
-        return null;
+        return new Itr();
     }
 
     @Override
     public Object[] toArray() {
         //TODO
+
         return new Object[0];
     }
 
     @Override
     public <T1> T1[] toArray(T1[] a) {
         //TODO
+
         return null;
     }
 
@@ -70,11 +71,10 @@ public class AbakumovaList<T>
     @Override
     public void add(int index, T element) {
         if (index > list.length - 1) {
-            Object[] list2 = new Object[list.length * 2 + 1];
-            for (int i = 0; i < size; i++) {
-                list2[i] = list[i];
-            }
-            list = list2;
+            increaseLength();
+        }
+        for (int i=size; i>index; i--){
+            list[i]=list[i-1];
         }
         list[index] = element;
         size++;
@@ -93,7 +93,7 @@ public class AbakumovaList<T>
             for (int i = index; i < size - 1; i++) {
                 list[i] = list[i + 1];
             }
-            list[size-1]=null;
+            list[size - 1] = null;
             size--;
         } catch (Exception e) {
             //TODO Exception
@@ -104,35 +104,89 @@ public class AbakumovaList<T>
 
     @Override
     public boolean containsAll(Collection<?> c) {
-        return false;
+
+        for (var elementC : c
+        ) {
+            boolean containsElement = false;
+            for (int i = 0; i < size; i++) {
+                if (list[i].equals(elementC)) {
+                    containsElement = true;
+                }
+            }
+            if (!containsElement) return false;
+        }
+        return true;
+
     }
 
     @Override
     public boolean addAll(Collection<? extends T> c) {
-        return false;
+
+        return addAll(size, c);
+    }
+
+    private void increaseLength() {
+
+        Object[] list2 = new Object[list.length * 2 + 1];
+        for (int i = 0; i < size; i++) {
+            list2[i] = list[i];
+        }
+        list = list2;
+
     }
 
     @Override
     public boolean addAll(int index, Collection<? extends T> c) {
-        return false;
+        while(list.length-1<size+c.size()) increaseLength();
+        for (int i=size+c.size(); i>=index+c.size(); i--){
+            list[i]=list[i-c.size()];
+        }
+        for (var elementC : c
+        ) {
+
+            list[index] =elementC;
+            size++;
+            index++;
+        }
+        return true;
     }
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        return false;
+        boolean result=false;
+        for (var elementC: c
+             ) {
+            for(int i=0; i<size; i++){
+                if(list[i].equals(elementC)){
+                    remove(elementC);
+                    result=true;
+                }
+            }
+        }
+        return result;
     }
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        return false;
+        boolean result=false;
+        AbakumovaList<T> removeList=new AbakumovaList<T>();
+        for(int i=0; i<size; i++){
+            if(!c.contains(list[i])){
+                removeList.add((T) list[i]);
+                result=true;
+            }
+        }
+        removeAll(removeList);
+        return result;
+
     }
 
     @Override
     public void clear() {
-        for(int i=0; i<size; i++){
-            list[i]=null;
+        for (int i = 0; i < size; i++) {
+            list[i] = null;
         }
-        size=0;
+        size = 0;
     }
 
     @Override
@@ -143,14 +197,16 @@ public class AbakumovaList<T>
 
     @Override
     public T set(int index, T element) {
-        return null;
+        T oldElement= (T) list[index];
+        list[index]=element;
+        return oldElement;
     }
 
 
     @Override
     public int indexOf(Object o) {
-        for(int i=0; i<size; i++){
-            if(list[i].equals(o)){
+        for (int i = 0; i < size; i++) {
+            if (list[i].equals(o)) {
                 return i;
             }
         }
@@ -159,21 +215,118 @@ public class AbakumovaList<T>
 
     @Override
     public int lastIndexOf(Object o) {
-        return 0;
+        for (int i = size - 1; i >= 0; i--) {
+            if (list[i].equals(o)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     @Override
     public ListIterator<T> listIterator() {
+        //TODO
         return null;
     }
 
     @Override
     public ListIterator<T> listIterator(int index) {
+        //TODO
         return null;
     }
 
     @Override
     public List<T> subList(int fromIndex, int toIndex) {
-        return null;
+        if (fromIndex >= size || fromIndex < 0 || toIndex >= size || toIndex < 0) {
+            try {
+                //TODO Exception
+                throw new Exception("fromIndex and toIndex should be  >=0 and <size");
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        List<T> result = null;
+        try {
+            result = new AbakumovaList<>(toIndex - fromIndex);
+            for (int i = fromIndex; i < toIndex; i++) {
+                result.add((T) list[i]);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return result;
     }
+
+
+    private class Itr implements Iterator<T> {
+        int cursor;       // index of next element to return
+        int lastRet = -1; // index of last element returned; -1 if no such
+        int expectedModCount = size;
+
+        // prevent creating a synthetic constructor
+        Itr() {
+        }
+
+        public boolean hasNext() {
+            return cursor != size;
+        }
+
+        @SuppressWarnings("unchecked")
+        public T next() {
+            checkForComodification();
+            int i = cursor;
+            if (i >= size)
+                throw new NoSuchElementException();
+            Object[] elementData = AbakumovaList.this.list;
+            if (i >= elementData.length)
+                throw new ConcurrentModificationException();
+            cursor = i + 1;
+            return (T) elementData[lastRet = i];
+        }
+
+        public void remove() {
+            if (lastRet < 0)
+                throw new IllegalStateException();
+            checkForComodification();
+
+            try {
+                AbakumovaList.this.remove(lastRet);
+                cursor = lastRet;
+                lastRet = -1;
+                expectedModCount = size;
+            } catch (IndexOutOfBoundsException ex) {
+                throw new ConcurrentModificationException();
+            }
+        }
+
+        @Override
+        public void forEachRemaining(Consumer<? super T> action) {
+            Objects.requireNonNull(action);
+            final int size = AbakumovaList.this.size;
+            int i = cursor;
+            if (i < size) {
+                final Object[] es = list;
+                if (i >= es.length)
+                    throw new ConcurrentModificationException();
+                for (; i < size && size == expectedModCount; i++)
+                    action.accept(elementAt(es, i));
+                // update once at end to reduce heap write traffic
+                cursor = i;
+                lastRet = i - 1;
+                checkForComodification();
+            }
+        }
+
+        final void checkForComodification() {
+            if (size != expectedModCount)
+                throw new ConcurrentModificationException();
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    static <E> E elementAt(Object[] es, int index) {
+        return (E) es[index];
+    }
+
 }
