@@ -200,8 +200,54 @@ public class AbakumovaList<T>
 
     @Override
     public void sort(Comparator<? super T> c) {
-        List.super.sort(c);
+        Object[]  sortList = new Object[size];
+        for(int i=0; i<size; i++){
+            sortList[i]=list[i];
+        }
+        list=quickSort((T[]) sortList, 0, size, c);
     }
+
+    private T[] quickSort(T[] array, int low, int high, Comparator<? super T> c) {
+        if (array.length == 0)
+            return array;//завершить выполнение, если длина массива равна 0
+
+        if (low >= high)
+            return array;//завершить выполнение если уже нечего делить
+
+        // выбрать опорный элемент
+        int middle = low + (high - low) / 2;
+        T opora = array[middle];
+
+        // разделить на подмассивы, который больше и меньше опорного элемента
+        int i = low, j = high-1;
+        while (i <= j) {
+            while (c.compare(array[i], opora)<0) {
+                i++;
+            }
+
+            while (c.compare(array[j], opora) > 0) {
+                j--;
+            }
+
+            if (i <= j) {//меняем местами
+                T temp = array[i];
+                array[i] = array[j];
+                array[j] = temp;
+                i++;
+                j--;
+            }
+        }
+
+        // вызов рекурсии для сортировки левой и правой части
+        if (low < j)
+            quickSort(array, low, j,c);
+
+        if (high > i)
+            quickSort(array, i, high,c);
+
+        return array;
+    }
+
 
     @Override
     public void clear() {
@@ -282,7 +328,7 @@ public class AbakumovaList<T>
 
     @Override
     public String getAuthor() {
-        return null;
+        return "AbakumovaOlga";
     }
 
 
