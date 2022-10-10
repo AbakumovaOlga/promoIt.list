@@ -10,14 +10,12 @@ public class Main {
         abakumovaList.add(33);
         abakumovaList.add(44);
 
-        AbakumovaList <Integer>  abakumovaList2 = new AbakumovaList<Integer> (2);
+       Integer[] a=new Integer[2];
+        var res=abakumovaList.toArray();
+        for (int i=0;i<res.length;i++){
+            System.out.println(res[i]);
+        }
 
-
-        abakumovaList2.add(88);
-        abakumovaList2.add(54);
-        abakumovaList2.add(77);
-
-        System.out.println(abakumovaList.retainAll(abakumovaList2));
         printList(abakumovaList);
 
     }

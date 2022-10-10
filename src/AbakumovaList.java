@@ -2,7 +2,7 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public class AbakumovaList<T>
-        implements List<T> {
+        implements List<T> , AuthorHolder{
 
     private Object[] list;
     private int size = 0;
@@ -50,16 +50,33 @@ public class AbakumovaList<T>
 
     @Override
     public Object[] toArray() {
-        //TODO
-
-        return new Object[0];
+        Object[] result=new Object[size];
+        for (int i=0; i<size; i++){
+            result[i]=list[i];
+        }
+        return result;
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T1> T1[] toArray(T1[] a) {
         //TODO
-
-        return null;
+        if(a.length>=size){
+            for (int i=0; i<size;i++){
+                a[i]=(T1) list[i];
+            }
+            if(a.length>size){
+                a[size]=null;
+            }
+            return a;
+        }
+        else {
+            Object[] result=  new Object[size];
+            for (int i=0; i<size;i++){
+                result[i]=(T1) list[i];
+            }
+            return (T1[]) result;
+        }
     }
 
     @Override
@@ -182,6 +199,11 @@ public class AbakumovaList<T>
     }
 
     @Override
+    public void sort(Comparator<? super T> c) {
+        List.super.sort(c);
+    }
+
+    @Override
     public void clear() {
         for (int i = 0; i < size; i++) {
             list[i] = null;
@@ -256,6 +278,11 @@ public class AbakumovaList<T>
         }
 
         return result;
+    }
+
+    @Override
+    public String getAuthor() {
+        return null;
     }
 
 
