@@ -1,8 +1,8 @@
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class AbakumovaList<T>
-        implements List<T> , AuthorHolder{
+public class AbakumovaList<T> implements List<T>, AuthorHolder {
 
     private Object[] list;
     private int size = 0;
@@ -35,7 +35,7 @@ public class AbakumovaList<T>
 
     @Override
     public boolean contains(Object o) {
-        for (int i=0; i<size;i++) {
+        for (int i = 0; i < size; i++) {
             if (list[i].equals(o)) {
                 return true;
             }
@@ -45,14 +45,14 @@ public class AbakumovaList<T>
 
     @Override
     public Iterator<T> iterator() {
-        return new Itr();
+        return new AbakumovaItr();
     }
 
     @Override
     public Object[] toArray() {
-        Object[] result=new Object[size];
-        for (int i=0; i<size; i++){
-            result[i]=list[i];
+        Object[] result = new Object[size];
+        for (int i = 0; i < size; i++) {
+            result[i] = list[i];
         }
         return result;
     }
@@ -60,22 +60,21 @@ public class AbakumovaList<T>
     @Override
     @SuppressWarnings("unchecked")
     public <T1> T1[] toArray(T1[] a) {
-        //TODO
-        if(a.length>=size){
-            for (int i=0; i<size;i++){
-                a[i]=(T1) list[i];
+        if (a.length >= size) {
+            for (int i = 0; i < size; i++) {
+                a[i] = (T1) list[i];
             }
-            if(a.length>size){
-                a[size]=null;
+            if (a.length > size) {
+                a[size] = null;
             }
             return a;
-        }
-        else {
-            Object[] result=  new Object[size];
-            for (int i=0; i<size;i++){
-                result[i]=(T1) list[i];
+        } else {
+            @SuppressWarnings("unchecked") final T1[] result = (T1[]) Array.newInstance(a.getClass().componentType(), size);
+            for (int i = 0; i < size; i++) {
+                var obj = (T1) list[i];
+                result[i] = (T1) list[i];
             }
-            return (T1[]) result;
+            return result;
         }
     }
 
@@ -90,8 +89,8 @@ public class AbakumovaList<T>
         if (index > list.length - 1) {
             increaseLength();
         }
-        for (int i=size; i>index; i--){
-            list[i]=list[i-1];
+        for (int i = size; i > index; i--) {
+            list[i] = list[i - 1];
         }
         list[index] = element;
         size++;
@@ -122,8 +121,7 @@ public class AbakumovaList<T>
     @Override
     public boolean containsAll(Collection<?> c) {
 
-        for (var elementC : c
-        ) {
+        for (var elementC : c) {
             boolean containsElement = false;
             for (int i = 0; i < size; i++) {
                 if (list[i].equals(elementC)) {
@@ -154,14 +152,13 @@ public class AbakumovaList<T>
 
     @Override
     public boolean addAll(int index, Collection<? extends T> c) {
-        while(list.length-1<size+c.size()) increaseLength();
-        for (int i=size+c.size(); i>=index+c.size(); i--){
-            list[i]=list[i-c.size()];
+        while (list.length - 1 < size + c.size()) increaseLength();
+        for (int i = size + c.size(); i >= index + c.size(); i--) {
+            list[i] = list[i - c.size()];
         }
-        for (var elementC : c
-        ) {
+        for (var elementC : c) {
 
-            list[index] =elementC;
+            list[index] = elementC;
             size++;
             index++;
         }
@@ -170,13 +167,12 @@ public class AbakumovaList<T>
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        boolean result=false;
-        for (var elementC: c
-             ) {
-            for(int i=0; i<size; i++){
-                if(list[i].equals(elementC)){
+        boolean result = false;
+        for (var elementC : c) {
+            for (int i = 0; i < size; i++) {
+                if (list[i].equals(elementC)) {
                     remove(elementC);
-                    result=true;
+                    result = true;
                 }
             }
         }
@@ -185,12 +181,12 @@ public class AbakumovaList<T>
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        boolean result=false;
-        AbakumovaList<T> removeList=new AbakumovaList<T>();
-        for(int i=0; i<size; i++){
-            if(!c.contains(list[i])){
+        boolean result = false;
+        AbakumovaList<T> removeList = new AbakumovaList<T>();
+        for (int i = 0; i < size; i++) {
+            if (!c.contains(list[i])) {
                 removeList.add((T) list[i]);
-                result=true;
+                result = true;
             }
         }
         removeAll(removeList);
@@ -200,28 +196,26 @@ public class AbakumovaList<T>
 
     @Override
     public void sort(Comparator<? super T> c) {
-        Object[]  sortList = new Object[size];
-        for(int i=0; i<size; i++){
-            sortList[i]=list[i];
+        Object[] sortList = new Object[size];
+        for (int i = 0; i < size; i++) {
+            sortList[i] = list[i];
         }
-        list=quickSort((T[]) sortList, 0, size, c);
+        list = quickSort((T[]) sortList, 0, size, c);
     }
 
     private T[] quickSort(T[] array, int low, int high, Comparator<? super T> c) {
-        if (array.length == 0)
-            return array;//завершить выполнение, если длина массива равна 0
+        if (array.length == 0) return array;//завершить выполнение, если длина массива равна 0
 
-        if (low >= high)
-            return array;//завершить выполнение если уже нечего делить
+        if (low >= high) return array;//завершить выполнение если уже нечего делить
 
         // выбрать опорный элемент
         int middle = low + (high - low) / 2;
         T opora = array[middle];
 
         // разделить на подмассивы, который больше и меньше опорного элемента
-        int i = low, j = high-1;
+        int i = low, j = high - 1;
         while (i <= j) {
-            while (c.compare(array[i], opora)<0) {
+            while (c.compare(array[i], opora) < 0) {
                 i++;
             }
 
@@ -239,11 +233,9 @@ public class AbakumovaList<T>
         }
 
         // вызов рекурсии для сортировки левой и правой части
-        if (low < j)
-            quickSort(array, low, j,c);
+        if (low < j) quickSort(array, low, j, c);
 
-        if (high > i)
-            quickSort(array, i, high,c);
+        if (high > i) quickSort(array, i, high, c);
 
         return array;
     }
@@ -265,8 +257,8 @@ public class AbakumovaList<T>
 
     @Override
     public T set(int index, T element) {
-        T oldElement= (T) list[index];
-        list[index]=element;
+        T oldElement = (T) list[index];
+        list[index] = element;
         return oldElement;
     }
 
@@ -293,14 +285,12 @@ public class AbakumovaList<T>
 
     @Override
     public ListIterator<T> listIterator() {
-        //TODO
-        return null;
+        return new AbakumovaItr();
     }
 
     @Override
     public ListIterator<T> listIterator(int index) {
-        //TODO
-        return null;
+        return new AbakumovaItr(index);
     }
 
     @Override
@@ -331,69 +321,71 @@ public class AbakumovaList<T>
         return "AbakumovaOlga";
     }
 
+    private class AbakumovaItr implements ListIterator<T> {
 
-    private class Itr implements Iterator<T> {
-        int cursor;       // index of next element to return
-        int lastRet = -1; // index of last element returned; -1 if no such
-        int expectedModCount = size;
+        int current = 0;
 
-        // prevent creating a synthetic constructor
-        Itr() {
+        public AbakumovaItr(int index) {
+            current = index;
         }
 
+        public AbakumovaItr() {
+            current = 0;
+        }
+
+        @Override
         public boolean hasNext() {
-            return cursor != size;
+            return current < size;
         }
 
-        @SuppressWarnings("unchecked")
+        @Override
         public T next() {
-            checkForComodification();
-            int i = cursor;
-            if (i >= size)
+            if (current < size) {
+                return (T) list[current++];
+            } else {
                 throw new NoSuchElementException();
-            Object[] elementData = AbakumovaList.this.list;
-            if (i >= elementData.length)
-                throw new ConcurrentModificationException();
-            cursor = i + 1;
-            return (T) elementData[lastRet = i];
-        }
-
-        public void remove() {
-            if (lastRet < 0)
-                throw new IllegalStateException();
-            checkForComodification();
-
-            try {
-                AbakumovaList.this.remove(lastRet);
-                cursor = lastRet;
-                lastRet = -1;
-                expectedModCount = size;
-            } catch (IndexOutOfBoundsException ex) {
-                throw new ConcurrentModificationException();
             }
         }
 
         @Override
-        public void forEachRemaining(Consumer<? super T> action) {
-            Objects.requireNonNull(action);
-            final int size = AbakumovaList.this.size;
-            int i = cursor;
-            if (i < size) {
-                final Object[] es = list;
-                if (i >= es.length)
-                    throw new ConcurrentModificationException();
-                for (; i < size && size == expectedModCount; i++)
-                    action.accept(elementAt(es, i));
-                // update once at end to reduce heap write traffic
-                cursor = i;
-                lastRet = i - 1;
-                checkForComodification();
-            }
+        public boolean hasPrevious() {
+            return current != 0;
         }
 
-        final void checkForComodification() {
-            if (size != expectedModCount)
-                throw new ConcurrentModificationException();
+        @Override
+        public T previous() {
+            int previous = current - 1;
+            if (previous < 0 || previous>size)
+                throw new NoSuchElementException();
+            return (T)list[--current];
+        }
+
+        @Override
+        public int nextIndex() {
+            return  current;
+        }
+
+        @Override
+        public int previousIndex() {
+            return current -1;
+        }
+
+        @Override
+        public void remove() {
+            //TODO
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void set(T t) {
+            //TODO
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public void add(T t) {
+            //TODO
+            throw new UnsupportedOperationException();
         }
     }
 
